@@ -1,29 +1,39 @@
-import { useState } from "react";
-import Formulaire from "./component/Formulaire"
-import AfficheDonnee from "./component/AfficheDonnee"
+import { useState, useEffect } from "react";
 
 function App() {
   const [utilisateurs, setUtilisateurs] = useState([]);
-  const [dataEdit, setDataEdit] = useState([]);
+  const [chargement, setChargement] = useState(true);
 
-  const ajouterUtilisateur = (utilisateur) => {
-    setUtilisateurs([...utilisateurs, utilisateur]);
-  }
+  useEffect(() => {
+    async function makaDonner() {
+      try {
+        setChargement(true);
+        const res = await fetch("https://jsonplaceholder.typicode.com/users");
+        const data = await res.json();
+        setUtilisateurs(data);
+      } catch (erreur) {
+        console.log("Misy olana: ", erreur);
+      } finally {
+        setChargement(false);
+      }
+    }
+    makaDonner();
+  }, []);
 
-  const supprimer = (id) => {
-    setUtilisateurs(utilisateurs.filter((utilisateur) => utilisateur.id !== id));
-  } 
-
-  const modifier = (data) => {
-    setDataEdit(data);
-  }
+  if(chargement) return <h1>Miandrasa kely ...</h1>;
 
   return (
     <>
-      <Formulaire ajouterUtilisateur={ajouterUtilisateur} data={dataEdit} />
-      <AfficheDonnee personnes={utilisateurs} supprimer={supprimer} modifier={modifier} />
+      <div>
+        <h1>Listr'ireo olona avy amin'ny Data:</h1>
+        <ul>
+          {utilisateurs.map(user => (
+            <li key={user.id}>{user.name} {user.username} - {user.email}</li>
+          ))}
+        </ul>
+      </div> 
     </>
-  )
+  );
 }
 
-export default App
+export default App;
